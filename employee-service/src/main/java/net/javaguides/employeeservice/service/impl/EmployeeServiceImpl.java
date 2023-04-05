@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import net.javaguides.employeeservice.dto.ApiResponseDto;
 import net.javaguides.employeeservice.dto.DepartmentDto;
 import net.javaguides.employeeservice.dto.EmployeeDto;
+import net.javaguides.employeeservice.dto.OrganizationDto;
 import net.javaguides.employeeservice.entity.Employee;
 import net.javaguides.employeeservice.exception.ResourceNotFoundException;
 import net.javaguides.employeeservice.repository.EmployeeRepository;
@@ -60,11 +61,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode());
 
-        EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
+       OrganizationDto organizationDto = webClient.get()
+               .uri("http://localhost:8083/api/organization/" + employee.getOrganizationCode())
+               .retrieve()
+               .bodyToMono(OrganizationDto.class)
+               .block();
+       EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
 
-        ApiResponseDto apiResponseDto = new ApiResponseDto(employeeDto, departmentDto);
+       ApiResponseDto apiResponseDto = new ApiResponseDto(employeeDto, departmentDto, organizationDto);
 
-        return apiResponseDto;
+       return apiResponseDto;
     }
 
     public ApiResponseDto getDefaultDepartment(Long id, Exception exception){
@@ -80,7 +86,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
 
-        ApiResponseDto apiResponseDto = new ApiResponseDto(employeeDto, departmentDto);
+        // for the testing purposes organization service is empty.
+        ApiResponseDto apiResponseDto = new ApiResponseDto(employeeDto, departmentDto, new OrganizationDto());
 
         return apiResponseDto;
     }
